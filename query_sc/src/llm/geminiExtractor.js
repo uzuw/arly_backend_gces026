@@ -1,3 +1,5 @@
+export const VERSION = '1.0.0';
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import logger from '../utils/logger.js';
 

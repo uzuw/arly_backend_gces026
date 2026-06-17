@@ -1,5 +1,8 @@
+export const VERSION = '1.0.0';
+
 import { scrapeUserLink } from '../scraper/linkScraper.js';
 import { extractWithLLM, validateExtraction } from '../llm/geminiExtractor.js';
+import { getVersions } from '../versions.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -29,7 +32,7 @@ export async function extractProductFromUrl(url) {
     logger.info(`Skipping LLM — data from ${ctx.method}`);
 
     const product = enrichWithSearchQueries(ctx);
-    return { success: true, product, method: ctx.method };
+    return { success: true, product, method: ctx.method, versions: getVersions() };
   }
 
   // ── Step 3: LLM extraction from raw text ────────────────────────────────
@@ -69,7 +72,7 @@ export async function extractProductFromUrl(url) {
 
   logger.info(`Product extracted: "${product.product_name}" | Rs. ${product.current_price}`);
 
-  return { success: true, product, method: 'llm' };
+  return { success: true, product, method: 'llm', versions: getVersions() };
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

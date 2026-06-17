@@ -1,3 +1,5 @@
+export const VERSION = '1.0.0';
+
 import axios from 'axios';
 import { extractProductContext, extractDomain } from './htmlExtractor.js';
 import logger from '../utils/logger.js';

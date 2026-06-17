@@ -1,5 +1,6 @@
 import express from 'express';
 import { extractProductFromUrl } from '../pipeline/extractionPipeline.js';
+import { getVersions } from '../versions.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -44,7 +45,14 @@ router.post('/extract', async (req, res) => {
  * Quick health check
  */
 router.get('/health', (_, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), versions: getVersions() });
 });
 
+router.get('/versions', (_, res) => {
+  res.json(getVersions());
+});
+
+const API_VERSION = process.env.APP_VERSION || 'v1';
+
+export { API_VERSION };
 export default router;

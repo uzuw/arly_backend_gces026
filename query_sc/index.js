@@ -17,7 +17,9 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/api', routes);
+import { API_VERSION } from './src/api/routes.js';
+app.use(`/api/${API_VERSION}`, routes);
+app.use('/api', routes); // keep bare /api for backwards compat
 
 app.listen(PORT, () => {
   logger.info(`SastoBheto backend running on port ${PORT}`);
