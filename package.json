@@ -1,0 +1,24 @@
+{
+  "name": "arly backend scrapper",
+  "version": "1.0.0",
+  "description": "Nepali retail price comparison backend",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "query:sc": "node query_sc/index.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.2.1",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "playwright": "^1.40.0",
+    "redis": "^4.6.10",
+    "uuid": "^9.0.0",
+    "winston": "^3.19.0",
+    "ws": "^8.14.2"
+  }
+}
