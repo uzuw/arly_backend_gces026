@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "query:sc": "node query_sc/index.js"
+    "query:sc": "node query_sc/index.js",
+    "scrape": "node product_scrapper/index.js",
+    "test": "node product_scrapper/test.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.1",
