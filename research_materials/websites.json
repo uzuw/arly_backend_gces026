@@ -1,0 +1,120 @@
+{
+  "nepal_ecommerce_sites": [
+    {
+      "name": "Daraz",
+      "url": "https://www.daraz.com.np",
+      "sells": "General marketplace - electronics, fashion, groceries, home appliances",
+      "method": "Selenium/Playwright (JS-rendered, anti-bot protection). Check Network tab for internal JSON API endpoints (e.g. /pdp/, /search/) as a faster alternative.",
+      "notes": "robots.txt disallows /catalog/, /checkout/, /cart/, /customer/. Owned by Alibaba Group, has strongest anti-bot measures of the list."
+    },
+    {
+      "name": "Sastodeal",
+      "url": "https://www.sastodeal.com",
+      "sells": "General marketplace - electronics, fashion, home goods, discounted items",
+      "method": "requests + BeautifulSoup (largely server-rendered); check for embedded JSON in <script> tags on product pages.",
+      "notes": "One of Nepal's oldest ecommerce sites; has partnerships with Flipkart for imported fashion."
+    },
+    {
+      "name": "HamroBazar",
+      "url": "https://www.hamrobazar.com",
+      "sells": "Classifieds - new & used electronics, vehicles, real estate, fashion",
+      "method": "requests + BeautifulSoup (classified-ad style listings, lighter JS dependency).",
+      "notes": "Functions like a classifieds board (OLX-style) rather than a traditional marketplace."
+    },
+    {
+      "name": "Gyapu",
+      "url": "https://www.gyapu.com",
+      "sells": "Groceries, FMCG, daily essentials, perishables",
+      "method": "Selenium/Playwright (built on modern JS framework for app-like mobile experience).",
+      "notes": "Popular for grocery delivery, grew rapidly during pandemic lockdowns."
+    },
+    {
+      "name": "Thulo.com",
+      "url": "https://www.thulo.com",
+      "sells": "General marketplace - health, fashion, electronics, household items",
+      "method": "requests + BeautifulSoup; verify pagination pattern in URLs for full catalog crawl.",
+      "notes": "Broad product range, positioned as a general marketplace."
+    },
+    {
+      "name": "OlizStore",
+      "url": "https://www.olizstore.com",
+      "sells": "Electronics - smartphones, laptops, gadgets, accessories",
+      "method": "requests + BeautifulSoup for catalog pages; check individual product pages for JS-loaded pricing/EMI details.",
+      "notes": "Focused on genuine/authentic electronics with EMI plans and after-sales support."
+    },
+    {
+      "name": "SmartDoko",
+      "url": "https://www.smartdoko.com",
+      "sells": "General marketplace - wide range of consumer goods",
+      "method": "requests + BeautifulSoup (standard server-rendered catalog).",
+      "notes": "Backed by IMS Group, one of Nepal's established business houses."
+    },
+    {
+      "name": "Neshop",
+      "url": "https://www.neshop.com.np",
+      "sells": "General marketplace - fashion, electronics, beauty products",
+      "method": "Check DevTools Network tab for internal JSON API first; fallback to Playwright if content is JS-rendered.",
+      "notes": "Newer platform (0% seller commission model), fast-growing as of 2026."
+    },
+    {
+      "name": "Hukut",
+      "url": "https://hukut.com",
+      "sells": "Electronics & gadgets - laptops, smartphones, tablets, wearables, cameras, TVs, home appliances",
+      "method": "requests + BeautifulSoup for catalog pages; check product detail pages for JS-loaded pricing/stock (verify via DevTools first, as Cloudflare-hosted sites sometimes add bot-detection at the edge).",
+      "notes": "Hosted behind Cloudflare - may add rate limiting or challenge pages if scraped aggressively. Also has a physical experience store in Newroad, Kathmandu."
+    },
+    {
+      "name": "Hardwarepasal",
+      "url": "https://hardwarepasal.com",
+      "sells": "Hardware & tools - power tools, hand tools, bathroom/computer/car hardware, building materials, paints, plumbing, cleaning essentials",
+      "method": "requests + BeautifulSoup - category-based catalog structure (e.g. /category/general-hardware), appears server-rendered based on page structure.",
+      "notes": "Marketplace model connecting multiple hardware suppliers; wide but niche-focused catalog (DIY/construction/industrial)."
+    },
+    {
+      "name": "Brother-Mart",
+      "url": "https://brother-mart.com",
+      "sells": "Electronics & gadgets - smartphones, smartwatches, earbuds, power banks, speakers, CCTV cameras, projectors, laptops, home appliances",
+      "method": "requests + BeautifulSoup likely sufficient for collection pages (e.g. /collections/all); site structure resembles Shopify - worth checking for a /products.json endpoint which would skip HTML parsing entirely.",
+      "notes": "Operating since 2016; also has EMI options, repair/exchange services, and an Android app. Site appears to run seasonal interactive promos (leaderboards, prediction games) that are JS-heavy but unrelated to product data."
+    },
+    {
+      "name": "Yantra Nepal",
+      "url": "https://yantranepal.com",
+      "sells": "Laptops & electronics - wide brand range (Apple, Acer, Asus, Lenovo, Dell, HP, MSI, Samsung, etc.), mobiles, accessories, wearables, audio",
+      "method": "requests + BeautifulSoup for catalog/category pages; product listing prices appear server-rendered based on page structure (visible pricing, discounts). Check for a WooCommerce/Shopify-style JSON export.",
+      "notes": "Launched 2021; positions itself as Nepal's largest laptop/electronics store with a very large multi-brand catalog - good candidate for price-comparison scraping."
+    },
+    {
+      "name": "Mobilemandu",
+      "url": "https://mobilemandu.com",
+      "sells": "Mobiles, laptops, home appliances, gadgets",
+      "method": "requests + BeautifulSoup likely sufficient for catalog pages; verify via DevTools whether pricing loads server-side or via JS/AJAX.",
+      "notes": "General electronics store, smaller/newer catalog compared to Daraz or Yantra Nepal."
+    },
+    {
+      "name": "Neptronics",
+      "url": "https://neptronics.com/store",
+      "sells": "Electronics & gadgets, plus retail/wholesale/repair services (phones, laptops, computers)",
+      "method": "requests + BeautifulSoup for catalog pages - smaller storefront, likely simpler server-rendered structure.",
+      "notes": "Smaller/independent electronics retailer with repair services alongside sales; catalog size likely modest compared to larger platforms."
+    },
+    {
+      "name": "Nagmani International",
+      "url": "https://www.nagmani.com.np",
+      "sells": "Electronics - laptops, computer parts/peripherals, gaming consoles, mobile accessories (Dell, HP, Lenovo, Acer)",
+      "method": "requests + BeautifulSoup for catalog pages; verify exact domain/URL structure before scraping, as this is a smaller regional retailer.",
+      "notes": "Known for laptops and computer parts/peripherals; verify current domain before building a scraper, as smaller Nepali retailers occasionally change hosting/domains."
+    },
+    {
+      "name": "Big Digital",
+      "url": "https://bigdigital.com.np",
+      "sells": "Electronics - mobiles, tablets, laptops, computers, cameras/DSLRs, home appliances (TVs, refrigerators, washing machines), accessories",
+      "method": "requests + BeautifulSoup for catalog pages; verify exact URL/domain and rendering method (server vs JS) before scraping.",
+      "notes": "Broad electronics + home appliance catalog; verify current domain, as this profile was sourced from a third-party review rather than direct site inspection."
+    }
+  ],
+  "general_notes": {
+    "before_scraping": "Check each site's robots.txt and Terms of Service before scraping. Prefer official APIs where available.",
+    "workflow": "1) Inspect Network tab in browser DevTools for internal JSON endpoints. 2) View page source to check if data is server-rendered or JS-injected. 3) Choose requests+BeautifulSoup for server-rendered pages, Selenium/Playwright for JS-heavy pages. 4) Always rate-limit requests and use realistic headers."
+  }
+}
