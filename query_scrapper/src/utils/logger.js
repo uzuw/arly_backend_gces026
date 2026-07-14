@@ -1,15 +1,7 @@
-import winston from 'winston';
+const prefix = () => new Date().toLocaleTimeString();
 
-const logger = winston.createLogger({
-  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-  format: winston.format.combine(
-    winston.format.timestamp({ format: 'HH:mm:ss' }),
-    winston.format.colorize(),
-    winston.format.printf(({ timestamp, level, message }) => {
-      return `${timestamp} [${level}] ${message}`;
-    })
-  ),
-  transports: [new winston.transports.Console()],
-});
-
-export default logger;
+export default {
+  info: (msg) => console.log(`${prefix()} [INFO] ${msg}`),
+  warn: (msg) => console.warn(`${prefix()} [WARN] ${msg}`),
+  error: (msg) => console.error(`${prefix()} [ERROR] ${msg}`),
+};
