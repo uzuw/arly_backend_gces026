@@ -3,6 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import { extractProductFromUrl } from './src/llm/pipeline.js';
 
+
 const app = express();
 const PORT = process.env.LLM_PORT || 3002;
 
