@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import { parsePrice } from './utils.js';
 
 const BASE = 'https://www.olizstore.com';
 
@@ -52,13 +53,11 @@ async function extractProducts(page) {
 
       // Current / sale price
       const priceEl = card.querySelector('.product-price');
-      const priceRaw = priceEl?.textContent?.trim() || '';
-      const price = priceRaw ? `Rs. ${priceRaw.replace(/,/g, '')}` : '';
+      const price = parsePrice(priceEl?.textContent);
 
       // Original / compare price (for discounts)
       const compareEl = card.querySelector('.product-compare-price');
-      const compareRaw = compareEl?.textContent?.trim() || '';
-      const comparePrice = compareRaw ? `Rs. ${compareRaw.replace(/,/g, '')}` : '';
+      const comparePrice = parsePrice(compareEl?.textContent);
 
       // Image
       const img = card.querySelector('img');

@@ -53,7 +53,7 @@ function parseJsonLdProduct(p) {
     description: p.description?.slice(0, 500) || null,
     current_price: offer?.price ? parseInt(offer.price) : null,
     availability: offer?.availability?.includes('InStock') ?? null,
-    image_url: Array.isArray(p.image) ? p.image[0] : p.image || null,
+    image_url: Array.isArray(p.image) ? p.image[0] : p.image || 'not available',
   };
 }
 
@@ -67,7 +67,7 @@ function tryOpenGraph($) {
     product_name: get('og:title') || $('title').text().split('|')[0].trim() || null,
     description: get('og:description'),
     current_price: parsePrice(get('og:price:amount') || get('product:price:amount')),
-    image_url: get('og:image'),
+    image_url: get('og:image') || 'not available',
   };
 }
 
@@ -120,6 +120,50 @@ export function extractRawText($, domain) {
     if (text.length > 30) descParts.push(text.slice(0, 400));
   });
   if (descParts.length) blocks.push(`DESCRIPTION/SPECS:\n  ${descParts[0]}`);
+
+  // Product image extraction — tiered selectors, then area heuristic, then class heuristic
+  const imgSelectors = [
+    '[class*="product"] img', '[class*="Product"] img',
+    '[id*="product"] img', '[data-testid*="image"] img',
+    '.gallery img', '.swiper img', '.carousel img',
+    '[class*="zoom"] img', '[class*="lightbox"] img',
+    'main img', 'article img',
+  ];
+  const seen = new Set();
+  for (const sel of imgSelectors) {
+    $(sel).each((_, el) => {
+      const src = $(el).attr('src') || $(el).attr('data-src') || $(el).attr('data-lazy-src') || '';
+      if (src && !seen.has(src) && !src.includes('svg') && !src.includes('icon') && !src.includes('logo')) {
+        const w = parseInt($(el).attr('width') || '0');
+        const h = parseInt($(el).attr('height') || '0');
+        if ((w > 0 && w < 50) || (h > 0 && h < 50)) return;
+        seen.add(src.startsWith('http') ? src : '');
+      }
+    });
+    if (seen.size) break;
+  }
+  if (!seen.size) {
+    let best = '', bestArea = 0;
+    $('body img').each((_, el) => {
+      const src = $(el).attr('src') || $(el).attr('data-src') || '';
+      if (!src || src.includes('svg') || src.includes('icon') || src.includes('logo')) return;
+      const w = parseInt($(el).attr('width') || '0');
+      const h = parseInt($(el).attr('height') || '0');
+      if (w * h > bestArea) { bestArea = w * h; best = src; }
+    });
+    if (best) seen.add(best);
+  }
+  if (!seen.size) {
+    $('img').each((_, el) => {
+      const cls = ($(el).attr('class') || '') + ' ' + ($(el).attr('alt') || '');
+      if (/product|item|goods|photo|pic/i.test(cls)) {
+        const src = $(el).attr('src') || $(el).attr('data-src') || '';
+        if (src) seen.add(src);
+      }
+    });
+  }
+  const imageUrl = seen.values().next().value || 'not available';
+  blocks.push(`PRODUCT IMAGE: ${imageUrl}`);
 
   return blocks.join('\n\n');
 }

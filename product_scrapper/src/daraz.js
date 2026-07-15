@@ -1,5 +1,7 @@
 import { UA, parsePrice } from './utils.js';
 
+// ponytail: inline parsePrice used instead of raw text for consistent formatting
+
 /**
  * Scrape Daraz product listings.
  * Daraz requires JavaScript rendering — uses Playwright.
@@ -38,7 +40,7 @@ export async function scrapeDaraz(query, pageNum = 1) {
         if (link && !link.startsWith('http')) link = 'https://www.daraz.com.np' + link;
         const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
         const title = lines.find((l) => !l.includes('Rs.') && l.length > 5) || '';
-        const price = lines.find((l) => l.includes('Rs.')) || '';
+        const price = parsePrice(lines.find((l) => l.includes('Rs.'))) || '';
         const desc = lines.slice(1).find((l) => !l.includes('Rs.') && l.length > 5) || '';
         return {
           title: title.slice(0, 200),

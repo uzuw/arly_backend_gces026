@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { fetchHtml, absoluteUrl } from './utils.js';
+import { fetchHtml, absoluteUrl, parsePrice } from './utils.js';
 
 const BASE = 'https://brother-mart.com';
 
@@ -19,7 +19,7 @@ export async function scrapeBrotherMart(query) {
       const link = absoluteUrl(linkEl.attr('href'), BASE);
       let title = linkEl.attr('aria-label') || '';
       if (!title) title = $el.find('a[aria-label]').attr('aria-label') || '';
-      const price = $el.find('.price').text().trim();
+      const price = parsePrice($el.find('.price').text());
       const desc = $el.text().replace(/\s+/g, ' ').trim().slice(0, 120);
       if (title) products.push({ title, price, description: desc, link });
     });

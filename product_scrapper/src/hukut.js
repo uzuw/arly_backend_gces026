@@ -35,8 +35,7 @@ export async function scrapeHukut(query, page = 1) {
         const text = el.innerText;
         const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
         const title = lines[0] || '';
-        const priceMatch = text.match(/Rs\.?\s*([\d,]+)/i);
-        const price = priceMatch ? `Rs. ${priceMatch[1]}` : '';
+        const price = parsePrice(text);
         return { title: title.slice(0, 200), price, description: title.slice(0, 100), link };
       });
 
@@ -51,8 +50,7 @@ export async function scrapeHukut(query, page = 1) {
             const text = el.innerText;
             const link = el.getAttribute('href') || '';
             const title = text.split('\n')[0].trim().slice(0, 200);
-            const priceMatch = text.match(/Rs\.?\s*([\d,]+)/i);
-            const price = priceMatch ? `Rs. ${priceMatch[1]}` : '';
+            const price = parsePrice(text);
             return { title, price, description: '', link };
           });
       }

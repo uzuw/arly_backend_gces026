@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import { parsePrice } from './utils.js';
 
 const BASE = 'https://smartdoko.com';
 
@@ -42,12 +43,10 @@ async function extractProducts(page) {
       if (!title || title.length < 3) return;
 
       const priceEl = card.querySelector('.price-new');
-      const priceRaw = priceEl?.textContent?.trim() || '';
-      // Format: "Rs. 114,000.00" — keep as-is
-      const price = priceRaw || '';
+      const price = parsePrice(priceEl?.textContent);
 
       const oldEl = card.querySelector('.price-old');
-      const oldPrice = oldEl?.textContent?.trim() || '';
+      const oldPrice = parsePrice(oldEl?.textContent);
 
       const img = card.querySelector('.cover-image img');
       const image = img?.src || '';

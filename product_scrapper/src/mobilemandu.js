@@ -1,5 +1,7 @@
 import { UA, parsePrice } from './utils.js';
 
+// ponytail: parsePrice handles all currency prefixes consistently
+
 /**
  * Scrape Mobilemandu product listings.
  * Mobilemandu is a Next.js site — requires Playwright for JS rendering.
@@ -44,8 +46,7 @@ export async function scrapeMobilemandu(query) {
           const text = el.innerText;
           const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
           const title = lines[0] || '';
-          const priceMatch = text.match(/Rs\.?\s*([\d,]+)/i);
-          const price = priceMatch ? `Rs. ${priceMatch[1]}` : '';
+          const price = parsePrice(text);
           if (!title || !link || seen.has(link)) return null;
           seen.add(link);
           return { title: title.slice(0, 200), price, description: title.slice(0, 100), link };

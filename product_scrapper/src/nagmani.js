@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import { parsePrice } from './utils.js';
 
 const BASE = 'https://nagmani.com.np';
 
@@ -46,11 +47,7 @@ async function extractProducts(page) {
 
       // Price — Magento format: <span class="price">NPR 31,250</span>
       const priceEl = card.querySelector('.price');
-      const priceRaw = priceEl?.textContent?.trim() || '';
-      // Convert "NPR 31,250" -> "Rs. 31250"
-      const price = priceRaw
-        ? `Rs. ${priceRaw.replace(/[^\d,]/g, '').replace(/,/g, '')}`
-        : '';
+      const price = parsePrice(priceEl?.textContent);
 
       // Image
       const img = card.querySelector('.product-image-photo');

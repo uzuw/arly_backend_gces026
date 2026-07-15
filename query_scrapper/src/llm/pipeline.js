@@ -31,6 +31,7 @@ export async function extractProductFromUrl(url) {
 
   product.source_site = ctx.source_site;
   product.source_url = url;
+  product.image_url = ctx.image_url || 'not available';
 
   return { success: true, product, method: 'llm' };
 }

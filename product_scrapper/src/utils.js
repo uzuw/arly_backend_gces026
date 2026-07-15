@@ -36,10 +36,17 @@ export async function postForm(url, payload) {
   return data;
 }
 
-/** Extract Rs. price from arbitrary text */
+/** Extract NPR price from arbitrary text.
+ *  Handles Rs., NPR, NRs, रु prefixes and plain numbers.
+ *  Strips commas, drops decimals, returns "Rs. <int>".
+ */
 export function parsePrice(text) {
-  const m = text?.match(/Rs\.?\s*([\d,]+)/i);
-  return m ? `Rs. ${m[1]}` : '';
+  if (!text) return '';
+  const cleaned = text.replace(/,/g, '');
+  // Rs/NPR/NRs/रु prefix optional, then digits (with optional decimal), then optional /-
+  const m = cleaned.match(/(?:Rs\.?\s*|NPR\.?\s*|NRs\.?\s*|रु\s*)?(\d+(?:\.\d{1,2})?)(?:\s*\/-)?/i);
+  if (!m) return '';
+  return `Rs. ${Math.round(parseFloat(m[1]))}`;
 }
 
 /** Normalise relative URLs to absolute */

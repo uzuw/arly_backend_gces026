@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import { parsePrice } from './utils.js';
 
 const BASE = 'https://hamrobazaar.com';
 
@@ -58,7 +59,7 @@ export async function scrapeHamroBazar(query) {
 
         // Normalize price
         const priceRaw = priceSpan.textContent?.trim() || '';
-        const price = priceRaw ? `Rs. ${priceRaw.replace(/,/g, '')}` : '';
+        const price = parsePrice(priceRaw);
 
         // Condition / status
         const conditionMatch = text.match(
