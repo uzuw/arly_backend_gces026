@@ -1,6 +1,6 @@
 import groq from './client.js';
 import { MODEL, RANKING_CONFIG } from './models.js';
-import { SYSTEM_PROMPT, buildUserPrompt } from './prompts.js';
+import { SYSTEM_PROMPT, buildUserPrompt, COMPARE_SYSTEM_PROMPT, buildComparePrompt } from './prompts.js';
 
 function stripMarkdownFences(text) {
   return text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
@@ -58,6 +58,35 @@ export async function summarizeWithLLM(query, scrapedResults) {
     console.warn('[llm] JSON parse failed, retrying with stricter prompt...');
     const retryText = await callGroq(
       SYSTEM_PROMPT,
+      `${userMessage}\n\nIMPORTANT: Return ONLY valid JSON. No extra text, no markdown fences, no explanations.`
+    );
+    return JSON.parse(stripMarkdownFences(retryText));
+  }
+}
+
+export async function compareWithLLM(sourceProduct, scrapedResults) {
+  const flatProducts = flattenResults(scrapedResults);
+
+  if (flatProducts.length === 0) {
+    return {
+      most_relevant: 'No products found for comparison.',
+      cheaper_alternatives: [],
+      other_similar: [],
+    };
+  }
+
+  const userMessage = buildComparePrompt(sourceProduct, flatProducts);
+
+  console.log(`[llm] Comparing ${flatProducts.length} products against "${sourceProduct.product_name}" via Groq (${MODEL})`);
+
+  try {
+    const text = await callGroq(COMPARE_SYSTEM_PROMPT, userMessage);
+    const cleaned = stripMarkdownFences(text);
+    return JSON.parse(cleaned);
+  } catch (error) {
+    console.warn('[llm] Compare JSON parse failed, retrying with stricter prompt...');
+    const retryText = await callGroq(
+      COMPARE_SYSTEM_PROMPT,
       `${userMessage}\n\nIMPORTANT: Return ONLY valid JSON. No extra text, no markdown fences, no explanations.`
     );
     return JSON.parse(stripMarkdownFences(retryText));

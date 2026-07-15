@@ -24,7 +24,7 @@ import { scrapeNagmani } from './src/nagmani.js';
 import { scrapeOlizStore } from './src/olizstore.js';
 import { scrapeSmartDoko } from './src/smartdoko.js';
 import { scrapeYantraNepal } from './src/yantranepal.js';
-import { summarizeWithLLM } from './src/llm/index.js';
+import { summarizeWithLLM, compareWithLLM } from './src/llm/index.js';
 
 const SCRAPERS = [
   scrapeBrotherMart,
@@ -88,6 +88,9 @@ const limiter = rateLimit({
 });
 
 app.use('/search', limiter);
+
+// Compare mode rate limit (same as search)
+app.use('/compare', limiter);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -154,6 +157,56 @@ app.post('/search',
   }
 );
 
+// Compare endpoint — accepts query_scrapper output directly
+app.post('/compare',
+  body('product').isObject().withMessage('product must be an object'),
+  body('product.product_name').isString().trim().isLength({ min: 1 }).withMessage('product.product_name is required'),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: 'Invalid input', details: errors.array() });
+    }
+
+    const { product } = req.body;
+    const query = product.search_queries?.[0] || product.product_name;
+
+    console.log(`🔍 Compare: "${query}" (source: ${product.source_site || 'unknown'}, Rs. ${product.current_price || '?'}) from ${req.ip}`);
+
+    try {
+      const timeout = setTimeout(() => {
+        res.status(504).json({ error: 'Request timeout', message: 'Scraping took too long.' });
+      }, 60000);
+
+      const results = await scrapeAll(query);
+      clearTimeout(timeout);
+
+      const total = results.reduce((s, r) => s + r.results.length, 0);
+      console.log(`Found ${total} products across ${results.length} stores, comparing with LLM...`);
+
+      const comparison = await compareWithLLM(product, results);
+
+      res.json({
+        query,
+        source: {
+          name: product.product_name,
+          brand: product.brand,
+          price: product.current_price,
+          site: product.source_site,
+        },
+        scraped_at: new Date().toISOString(),
+        total_products: total,
+        ...comparison,
+      });
+    } catch (error) {
+      console.error('Compare error:', error);
+      res.status(500).json({
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
+      });
+    }
+  }
+);
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
@@ -170,6 +223,7 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`🚀 Product scraper API running on http://localhost:${PORT}`);
   console.log(`   POST /search  {"item": "playstation"}`);
+  console.log(`   POST /compare {"product": {...}}  ← query_scrapper output`);
   console.log(`   GET  /health`);
 });
 
