@@ -9,6 +9,7 @@
  *   node index.js "brush"
  */
 
+import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
@@ -23,6 +24,7 @@ import { scrapeNagmani } from './src/nagmani.js';
 import { scrapeOlizStore } from './src/olizstore.js';
 import { scrapeSmartDoko } from './src/smartdoko.js';
 import { scrapeYantraNepal } from './src/yantranepal.js';
+import { summarizeWithLLM } from './src/llm/index.js';
 
 const SCRAPERS = [
   scrapeBrotherMart,
@@ -132,12 +134,15 @@ app.post('/search',
       clearTimeout(timeout);
 
       const total = results.reduce((s, r) => s + r.results.length, 0);
+      console.log(`Found ${total} products across ${results.length} stores, ranking with LLM...`);
+
+      const summary = await summarizeWithLLM(query, results);
 
       res.json({
         query,
         scraped_at: new Date().toISOString(),
         total_products: total,
-        results,
+        ...summary,
       });
     } catch (error) {
       console.error('Scraping error:', error);
