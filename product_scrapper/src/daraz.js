@@ -32,6 +32,13 @@ export async function scrapeDaraz(query, pageNum = 1) {
     }
 
     const products = await page.evaluate(() => {
+      function parsePrice(text) {
+        if (!text) return '';
+        const cleaned = text.replace(/,/g, '');
+        const m = cleaned.match(/(?:Rs\.?\s*|NPR\.?\s*|NRs\.?\s*|रु\s*)?(\d+(?:\.\d{1,2})?)(?:\s*\/-)?/i);
+        if (!m) return '';
+        return `Rs. ${Math.round(parseFloat(m[1]))}`;
+      }
       const items = document.querySelectorAll('[data-qa-locator="product-item"]');
       return Array.from(items).map((el) => {
         const text = el.innerText;
