@@ -1,23 +1,32 @@
 import { chromium } from 'playwright';
 import { extractProductContext } from './htmlExtractor.js';
 
-const TIMEOUT = parseInt(process.env.SCRAPER_TIMEOUT_MS) || 10000;
+const TIMEOUT = parseInt(process.env.SCRAPER_TIMEOUT_MS) || 15000;
 const MIN_HTML_LENGTH = 500;
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+  '(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
 export async function scrapeUrl(url) {
   let browser;
   try {
     browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage();
+    const context = await browser.newContext({
+      userAgent: UA,
+      viewport: { width: 1920, height: 1080 },
+      locale: 'en-US',
+      timezoneId: 'America/New_York',
+      bypassCSP: true,
+    });
+    const page = await context.newPage();
 
-    await page.setExtraHTTPHeaders({
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-        '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
     });
 
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
-    await page.waitForSelector('h1, [class*="price"]', { timeout: 5000 }).catch(() => {});
+    await page.goto(url, { waitUntil: 'networkidle', timeout: TIMEOUT });
+    await page.waitForTimeout(2000);
 
     const html = await page.content();
     if (!html || html.length < MIN_HTML_LENGTH) {

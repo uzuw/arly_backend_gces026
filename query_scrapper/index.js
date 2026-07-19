@@ -2,6 +2,7 @@ import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 import { extractProductFromUrl } from './src/llm/pipeline.js';
+import { scrapeAll } from '../product_scrapper/index.js';
 
 
 const app = express();
@@ -42,8 +43,17 @@ app.post('/', async (req, res) => {
   console.log(`[api] POST /  url=${url}`);
 
   try {
-    const result = await extractProductFromUrl(url);
-    res.json(result);
+    const queryData = await extractProductFromUrl(url);
+    console.log('[query-scrapper]', JSON.stringify(queryData, null, 2));
+
+    let storeData = [];
+    if (queryData.success && queryData.product?.product_name) {
+      const query = queryData.product.search_queries?.[0] || queryData.product.product_name;
+      storeData = await scrapeAll(query);
+      console.log('[product-scrappers]', JSON.stringify(storeData, null, 2));
+    }
+
+    res.json({ ...queryData, store_results: storeData });
   } catch (error) {
     console.error('[api] Extraction error:', error.message);
     res.status(500).json({
