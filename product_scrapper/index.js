@@ -10,39 +10,56 @@
  */
 
 import 'dotenv/config';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { body, validationResult } from 'express-validator';
 import { scrapeBrotherMart } from './src/brothermart.js';
 import { scrapeDaraz } from './src/daraz.js';
-import { scrapeHamroBazar } from './src/hamrobazar.js';
 import { scrapeHardwarePasal } from './src/hardwarepasal.js';
-import { scrapeHukut } from './src/hukut.js';
-import { scrapeMobilemandu } from './src/mobilemandu.js';
 import { scrapeNagmani } from './src/nagmani.js';
 import { scrapeOlizStore } from './src/olizstore.js';
 import { scrapeSmartDoko } from './src/smartdoko.js';
-import { scrapeYantraNepal } from './src/yantranepal.js';
+import { scrapeMudita } from './src/mudita.js';
+import { scrapeItti } from './src/itti.js';
 import { summarizeWithLLM, compareWithLLM } from './src/llm/index.js';
 
-const SCRAPERS = [
+const __filename = fileURLToPath(import.meta.url);
+const isMainModule = process.argv[1] && path.resolve(__filename) === path.resolve(process.argv[1]);
+
+const ALL_SCRAPERS = [
   scrapeBrotherMart,
   scrapeDaraz,
-  scrapeHamroBazar,
   scrapeHardwarePasal,
-  scrapeHukut,
-  scrapeMobilemandu,
   scrapeNagmani,
   scrapeOlizStore,
   scrapeSmartDoko,
-  scrapeYantraNepal,
+  scrapeMudita,
+  scrapeItti,
+];
+
+const PHONE_LAPTOP_SCRAPERS = [
+  scrapeBrotherMart,
+  scrapeDaraz,
+  scrapeOlizStore,
+  scrapeSmartDoko,
+  scrapeNagmani,
 ];
 
 // ── Helpers ──────────────────────────────────────────────
 export async function scrapeAll(query) {
+  return runScrapers(ALL_SCRAPERS, query);
+}
+
+export async function scrapePhoneLaptop(query) {
+  return runScrapers(PHONE_LAPTOP_SCRAPERS, query);
+}
+
+async function runScrapers(scrapers, query) {
   const results = await Promise.allSettled(
-    SCRAPERS.map((fn) => fn(query))
+    scrapers.map((fn) => fn(query))
   );
 
   const combined = [];
@@ -57,13 +74,15 @@ export async function scrapeAll(query) {
 }
 
 // ── CLI mode ──────────────────────────────────────────────
-const queryFromArg = process.argv[2];
-if (queryFromArg) {
-  const results = await scrapeAll(queryFromArg.trim());
-  const total = results.reduce((s, r) => s + r.results.length, 0);
-  process.stdout.write(JSON.stringify({ query: queryFromArg.trim(), results }, null, 2));
-  process.stderr.write(`\n${total} total products across ${results.length} stores\n`);
-  process.exit(0);
+if (isMainModule) {
+  const queryFromArg = process.argv[2];
+  if (queryFromArg) {
+    const results = await scrapeAll(queryFromArg.trim());
+    const total = results.reduce((s, r) => s + r.results.length, 0);
+    process.stdout.write(JSON.stringify({ query: queryFromArg.trim(), results }, null, 2));
+    process.stderr.write(`\n${total} total products across ${results.length} stores\n`);
+    process.exit(0);
+  }
 }
 
 // ── API mode ──────────────────────────────────────────────
@@ -218,13 +237,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// ── Start server ──────────────────────────────────────────
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 Product scraper API running on http://localhost:${PORT}`);
-  console.log(`   POST /search  {"item": "playstation"}`);
-  console.log(`   POST /compare {"product": {...}}  ← query_scrapper output`);
-  console.log(`   GET  /health`);
-});
+// ── Start server (only when run directly) ──────────────────
+if (isMainModule) {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`🚀 Product scraper API running on http://localhost:${PORT}`);
+    console.log(`   POST /search  {"item": "playstation"}`);
+    console.log(`   POST /compare {"product": {...}}  ← query_scrapper output`);
+    console.log(`   GET  /health`);
+  });
+}
 
 export default app;
